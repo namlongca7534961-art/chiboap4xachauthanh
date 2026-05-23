@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Chi Bộ Ấp 4">
+<link rel="manifest" href="manifest.json">
+<title>Chi Bộ Ấp 4 - Xã Châu Thành</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ── LOGIN SCREEN ── */
+  #login-screen {
+    position: fixed; inset: 0; z-index: 999;
+    background: linear-gradient(160deg, #96281b 0%, #c0392b 45%, #e74c3c 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 32px 28px;
+    font-family: 'Be Vietnam Pro', sans-serif;
+  }
+  .login-logo {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 2.5px solid rgba(255,255,255,0.35);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 34px; margin-bottom: 16px;
+  }
+  .login-title { color: white; font-size: 18px; font-weight: 700; margin-bottom: 4px; text-align: center; line-height: 1.3; }
+  .login-sub { color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 36px; text-align: center; }
+  .login-card {
+    background: white; border-radius: 20px; padding: 24px 22px;
+    width: 100%; max-width: 340px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  }
+  .login-card h2 { font-size: 16px; font-weight: 700; color: #1a1a1a; margin-bottom: 18px; }
+  .login-field { margin-bottom: 14px; position: relative; }
+  .login-field label { font-size: 12px; font-weight: 600; color: #666; display: block; margin-bottom: 6px; }
+  .login-field input {
+    width: 100%; padding: 12px 42px 12px 14px;
+    border: 1.5px solid #e8e8e8; border-radius: 10px;
+    font-size: 15px; font-family: inherit; color: #1a1a1a;
+    outline: none; transition: border-color .2s; background: #fafafa;
+  }
+  .login-field input:focus { border-color: #c0392b; background: white; }
+  .toggle-pw {
+    position: absolute; right: 12px; top: 34px;
+    background: none; border: none; cursor: pointer;
+    font-size: 16px; color: #aaa; padding: 2px;
+  }
+  .login-err {
+    font-size: 12px; color: #e74c3c; background: #fff5f5;
+    border-radius: 8px; padding: 8px 12px; margin-bottom: 14px;
+    display: none; text-align: center;
+  }
+  .login-err.show { display: block; }
+  .btn-login {
+    width: 100%; padding: 13px;
+    background: linear-gradient(135deg, #c0392b, #96281b);
+    color: white; border: none; border-radius: 10px;
+    font-size: 15px; font-weight: 700; font-family: inherit;
+    cursor: pointer; box-shadow: 0 4px 14px rgba(192,57,43,0.35);
+    transition: opacity .15s;
+  }
+  .btn-login:active { opacity: .85; }
+  .login-footer { margin-top: 14px; text-align: center; }
+  .login-footer span { font-size: 12px; color: #aaa; }
+
+  .btn-lock {
+    background: rgba(255,255,255,0.18);
+    border: 1.5px solid rgba(255,255,255,0.35);
+    color: white; border-radius: 50%; width: 34px; height: 34px;
+    font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  #chpw-sheet .sheet { max-height: 60vh; }
+
+  :root {
+    --red: #c0392b; --red-dark: #96281b; --red-light: #fdf2f2; --red-mid: #e74c3c;
+    --gold: #d4a843; --gold-light: #fdf8ee;
+    --text: #1a1a1a; --text-2: #555; --text-3: #999;
+    --bg: #f5f5f5; --card: #ffffff; --border: #e8e8e8;
+    --success: #27ae60; --success-bg: #eafaf1;
+    --warn: #e67e22; --warn-bg: #fef5e7;
+    --radius: 14px; --radius-sm: 8px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.13);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    background: var(--bg); color: var(--text);
+    min-height: 100vh; max-width: 480px; margin: 0 auto;
+    position: relative; overflow-x: hidden;
+  }
+  .header {
+    background: linear-gradient(135deg, var(--red-dark) 0%, var(--red) 100%);
+    padding: 16px 18px 20px;
+    padding-top: calc(16px + env(safe-area-inset-top, 0px));
+    position: sticky; top: 0; z-index: 50;
+  }
+  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .header-logo { display: flex; align-items: center; gap: 10px; }
+  .logo-star {
+    width: 36px; height: 36px; background: var(--gold);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .header-title { color: white; }
+  .header-title h1 { font-size: 15px; font-weight: 700; line-height: 1.2; }
+  .header-title p { font-size: 10px; opacity: 0.8; margin-top: 1px; }
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); overflow: hidden;
+  }
+  .stat-item { padding: 10px 4px; text-align: center; color: white; }
+  .stat-item + .stat-item { border-left: 1px solid rgba(255,255,255,0.15); }
+  .stat-num { font-size: 20px; font-weight: 700; line-height: 1; }
+  .stat-lbl { font-size: 10px; opacity: 0.8; margin-top: 3px; line-height: 1.2; }
+
+  .search-wrap { padding: 14px 16px 8px; display: flex; gap: 8px; }
+  .search-box { flex: 1; position: relative; }
+  .search-box input {
+    width: 100%; padding: 10px 12px 10px 36px;
+    border: 1.5px solid var(--border); border-radius: 50px;
+    font-size: 14px; font-family: inherit; background: var(--card); color: var(--text); outline: none;
+  }
+  .search-box input:focus { border-color: var(--red); }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-3); font-size: 15px; }
+  .filter-chips { display: flex; gap: 8px; padding: 0 16px 12px; overflow-x: auto; scrollbar-width: none; }
+  .filter-chips::-webkit-scrollbar { display: none; }
+  .chip {
+    flex-shrink: 0; padding: 5px 12px; border-radius: 50px;
+    border: 1.5px solid var(--border); background: var(--card);
+    font-size: 12px; font-weight: 500; font-family: inherit; color: var(--text-2); cursor: pointer;
+  }
+  .chip.active { border-color: var(--red); background: var(--red-light); color: var(--red); }
+
+  .list-wrap { padding: 0 16px; padding-bottom: calc(90px + var(--safe-bottom)); }
+  .section-label { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .8px; margin: 8px 0 10px; }
+  .member-card {
+    background: var(--card); border-radius: var(--radius); padding: 14px; margin-bottom: 10px;
+    box-shadow: var(--shadow); display: flex; align-items: center; gap: 12px; cursor: pointer;
+    border: 1.5px solid transparent; transition: border-color .15s, box-shadow .15s; position: relative; overflow: hidden;
+  }
+  .member-card:active { border-color: var(--red); box-shadow: var(--shadow-lg); }
+  .member-card.msh-card { border-left: 3px solid var(--text-3); }
+  .avatar {
+    width: 50px; height: 62px; border-radius: var(--radius-sm); flex-shrink: 0;
+    background: linear-gradient(135deg, var(--red-light), #fff);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700; color: var(--red); overflow: hidden;
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .member-info { flex: 1; min-width: 0; }
+  .member-name { font-size: 15px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+  .member-sub { font-size: 12px; color: var(--text-3); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .badges { display: flex; gap: 5px; flex-wrap: wrap; }
+  .badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 50px; }
+  .badge-ct { background: var(--success-bg); color: var(--success); }
+  .badge-db { background: var(--warn-bg); color: var(--warn); }
+  .badge-msh { background: #f0f0f0; color: #888; }
+  .card-arrow { color: var(--text-3); font-size: 16px; flex-shrink: 0; }
+  .btn-delete-inline {
+    background: none; border: none; cursor: pointer; color: #ccc;
+    font-size: 18px; padding: 8px 4px 8px 8px; flex-shrink: 0; transition: color .15s;
+  }
+  .btn-delete-inline:active { color: var(--red-mid); }
+  .empty { text-align: center; padding: 60px 20px; color: var(--text-3); display: none; }
+  .empty .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+  .fab {
+    position: fixed; bottom: calc(24px + var(--safe-bottom)); right: 50%;
+    transform: translateX(calc(50% + 140px));
+    width: 56px; height: 56px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--red), var(--red-dark));
+    color: white; border: none; font-size: 26px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; box-shadow: 0 4px 20px rgba(192,57,43,0.45); z-index: 40;
+  }
+  @media (max-width: 480px) { .fab { right: 20px; transform: none; } }
+
+  .sheet-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 100; align-items: flex-end; justify-content: center;
+  }
+  .sheet-overlay.show { display: flex; }
+  .sheet {
+    background: var(--card); border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 480px; max-height: 92vh; overflow-y: auto;
+    padding: 0 0 calc(20px + var(--safe-bottom));
+    animation: slideUp .25s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .sheet-handle { width: 36px; height: 4px; background: #e0e0e0; border-radius: 2px; margin: 12px auto 0; }
+  .sheet-header {
+    padding: 14px 18px 16px; display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--card); z-index: 1;
+  }
+  .sheet-title { font-size: 17px; font-weight: 700; }
+  .sheet-close {
+    width: 32px; height: 32px; border-radius: 50%; background: var(--bg);
+    border: none; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-2);
+  }
+
+  .form-body { padding: 16px 18px; }
+  .avatar-upload { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
+  .avatar-upload-box {
+    width: 80px; height: 100px; border-radius: var(--radius-sm);
+    border: 2px dashed var(--border); background: var(--bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; position: relative; overflow: hidden;
+  }
+  .avatar-upload-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+  .avatar-upload-hint { font-size: 10px; color: var(--text-3); margin-top: 4px; text-align: center; line-height: 1.4; }
+  .avatar-upload-icon { font-size: 24px; color: var(--text-3); }
+  .avatar-rm-btn { margin-top: 6px; font-size: 12px; color: var(--red-mid); background: none; border: none; font-family: inherit; cursor: pointer; display: none; padding: 2px 0; }
+
+  /* ── IMAGE LIGHTBOX ── */
+  #lightbox {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+    z-index: 500; align-items: center; justify-content: center; flex-direction: column;
+  }
+  #lightbox.show { display: flex; }
+  #lightbox img { max-width: 90vw; max-height: 75vh; border-radius: var(--radius); object-fit: contain; }
+  #lightbox-name { color: white; font-size: 15px; font-weight: 600; margin-top: 14px; }
+  #lightbox-close {
+    position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.2);
+    border: none; color: white; font-size: 22px; width: 40px; height: 40px;
+    border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  #lightbox-download {
+    margin-top: 14px; padding: 10px 24px;
+    background: white; color: var(--red); border: none; border-radius: 50px;
+    font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer;
+  }
+
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 12px; font-weight: 600; color: var(--text-2); display: block; margin-bottom: 6px; }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 15px; font-family: inherit; background: var(--card); color: var(--text);
+    outline: none; -webkit-appearance: none; appearance: none; transition: border-color .2s;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--red); }
+  .form-textarea { resize: vertical; min-height: 70px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-section-title {
+    font-size: 11px; font-weight: 700; color: var(--red); text-transform: uppercase;
+    letter-spacing: .8px; margin: 18px 0 12px; display: flex; align-items: center; gap: 6px;
+  }
+  .form-section-title::after { content: ''; flex: 1; height: 1px; background: var(--red-light); }
+  .form-footer { padding: 12px 18px 0; display: flex; gap: 10px; }
+  .btn-cancel {
+    flex: 1; padding: 13px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    background: none; font-size: 15px; font-weight: 600; font-family: inherit; color: var(--text-2); cursor: pointer;
+  }
+  .btn-save {
+    flex: 2; padding: 13px; border: none; border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, var(--red), var(--red-dark));
+    color: white; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer;
+  }
+
+  .detail-avatar-wrap {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 20px 18px 16px;
+    background: linear-gradient(180deg, var(--red-light) 0%, transparent 100%);
+  }
+  .detail-avatar {
+    width: 80px; height: 100px; border-radius: var(--radius);
+    background: linear-gradient(135deg, var(--red-light), white);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 700; color: var(--red); overflow: hidden;
+    border: 2px solid white; box-shadow: var(--shadow); margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .detail-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .detail-avatar:hover { opacity: .9; }
+  .detail-name { font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 4px; }
+  .detail-sub { font-size: 13px; color: var(--text-2); text-align: center; margin-bottom: 10px; }
+  .detail-badges { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+  .detail-section { padding: 0 18px; margin-bottom: 4px; }
+  .detail-section-title { font-size: 11px; font-weight: 700; color: var(--red); text-transform: uppercase; letter-spacing: .8px; margin: 16px 0 8px; }
+  .detail-row { display: flex; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--border); gap: 12px; }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-key { font-size: 13px; color: var(--text-3); width: 120px; flex-shrink: 0; padding-top: 1px; }
+  .detail-val { font-size: 14px; font-weight: 500; flex: 1; }
+  .detail-actions { padding: 14px 18px; display: flex; gap: 10px; border-top: 1px solid var(--border); margin-top: 8px; }
+  .btn-danger { flex: 1; padding: 13px; border: 1.5px solid #fcc; border-radius: var(--radius-sm); background: #fff5f5; color: var(--red-mid); font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; }
+  .btn-primary { flex: 2; padding: 13px; border: none; border-radius: var(--radius-sm); background: linear-gradient(135deg, var(--red), var(--red-dark)); color: white; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; }
+
+  .dialog-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+  .dialog-overlay.show { display: flex; }
+  .dialog { background: var(--card); border-radius: var(--radius); padding: 24px 20px 16px; width: 100%; max-width: 320px; animation: fadeIn .2s ease; }
+  @keyframes fadeIn { from { opacity:0; transform: scale(.95); } to { opacity:1; transform: scale(1); } }
+  .dialog-icon { font-size: 36px; text-align: center; margin-bottom: 10px; }
+  .dialog-title { font-size: 17px; font-weight: 700; text-align: center; margin-bottom: 8px; }
+  .dialog-msg { font-size: 14px; color: var(--text-2); text-align: center; margin-bottom: 20px; line-height: 1.5; }
+  .dialog-btns { display: flex; gap: 10px; }
+  .dialog-cancel { flex: 1; padding: 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: none; font-size: 14px; font-weight: 600; font-family: inherit; color: var(--text-2); cursor: pointer; }
+  .dialog-confirm { flex: 1; padding: 12px; border: none; border-radius: var(--radius-sm); background: var(--red-mid); color: white; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; }
+
+  select.form-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-logo">★</div>
+  <div class="login-title">Chi Bộ Ấp 4<br>Xã Châu Thành - Tỉnh Tây Ninh</div>
+  <div class="login-sub">Vui lòng đăng nhập để tiếp tục</div>
+  <div class="login-card">
+    <h2>🔐 Đăng nhập</h2>
+    <div class="login-field">
+      <label>Mật khẩu</label>
+      <input type="password" id="pw-input" placeholder="Nhập mật khẩu..." onkeydown="if(event.key==='Enter') doLogin()">
+      <button class="toggle-pw" onclick="togglePwVis('pw-input', this)" tabindex="-1">👁</button>
+    </div>
+    <div class="login-err" id="login-err">Mật khẩu không đúng. Vui lòng thử lại.</div>
+    <button class="btn-login" onclick="doLogin()">Đăng nhập</button>
+    <div class="login-footer"><span>Mật khẩu mặc định: <b>123456</b></span></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div class="header-logo">
+      <div class="logo-star">★</div>
+      <div class="header-title">
+        <h1>Chi Bộ Ấp 4 - Xã Châu Thành</h1>
+        <p>Tỉnh Tây Ninh</p>
+      </div>
+    </div>
+    <button class="btn-lock" onclick="showChpwMenu()" title="Bảo mật">🔒</button>
+  </div>
+  <div class="stats">
+    <div class="stat-item"><div class="stat-num" id="stat-total">0</div><div class="stat-lbl">Tổng số</div></div>
+    <div class="stat-item"><div class="stat-num" id="stat-ct">0</div><div class="stat-lbl">Chính thức</div></div>
+    <div class="stat-item"><div class="stat-num" id="stat-db">0</div><div class="stat-lbl">Dự bị</div></div>
+    <div class="stat-item"><div class="stat-num" id="stat-msh">0</div><div class="stat-lbl">Miễn SH</div></div>
+  </div>
+</div>
+
+<!-- SEARCH & FILTER -->
+<div class="search-wrap">
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="search" id="search-input" placeholder="Tìm tên, chức vụ, số thẻ..." oninput="renderList()">
+  </div>
+</div>
+<div class="filter-chips">
+  <button class="chip active" onclick="setFilter('')" data-filter="">Tất cả</button>
+  <button class="chip" onclick="setFilter('ct')" data-filter="ct">Chính thức</button>
+  <button class="chip" onclick="setFilter('db')" data-filter="db">Dự bị</button>
+  <button class="chip" onclick="setFilter('msh')" data-filter="msh">Miễn sinh hoạt</button>
+</div>
+
+<!-- LIST -->
+<div class="list-wrap">
+  <div class="section-label" id="list-count"></div>
+  <div id="member-list"></div>
+  <div class="empty" id="empty-state">
+    <div class="empty-icon">🔍</div>
+    <p>Không tìm thấy đảng viên nào</p>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="fab" onclick="showAddSheet()" aria-label="Thêm đảng viên">+</button>
+
+<!-- IMAGE LIGHTBOX -->
+<div id="lightbox">
+  <button id="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightbox-img" src="" alt="">
+  <div id="lightbox-name"></div>
+  <button id="lightbox-download" onclick="downloadAvatar()">⬇ Tải ảnh về</button>
+</div>
+
+<!-- FORM SHEET -->
+<div class="sheet-overlay" id="form-sheet">
+  <div class="sheet" id="form-sheet-inner">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <span class="sheet-title" id="form-title">Thêm đảng viên</span>
+      <button class="sheet-close" onclick="closeFormSheet()">✕</button>
+    </div>
+    <div class="form-body">
+      <div class="avatar-upload">
+        <div class="avatar-upload-box" onclick="document.getElementById('f-avatar').click()" id="avatar-box">
+          <span class="avatar-upload-icon" id="av-icon">📷</span>
+          <img id="av-img" src="" alt="">
+        </div>
+        <div class="avatar-upload-hint">Nhấn để tải ảnh thẻ</div>
+        <button class="avatar-rm-btn" id="av-rm-btn" onclick="removeAvatar()">✕ Xóa ảnh</button>
+        <input type="file" id="f-avatar" accept="image/*" style="display:none" onchange="handleAvatar(this)">
+      </div>
+
+      <div class="form-section-title">Thông tin cá nhân</div>
+      <div class="form-group">
+        <label class="form-label">Họ và tên *</label>
+        <input type="text" class="form-input" id="f-ten" placeholder="Nguyễn Văn A">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Ngày sinh</label>
+          <input type="date" class="form-input" id="f-ngaysinh">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Giới tính</label>
+          <select class="form-select" id="f-gioitinh">
+            <option>Nam</option><option>Nữ</option><option>Khác</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Quê quán</label>
+        <input type="text" class="form-input" id="f-quequan" placeholder="Xã/Phường, Huyện/TP, Tỉnh...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nơi đăng ký khai sinh</label>
+        <input type="text" class="form-input" id="f-khaisinh" placeholder="Xã/Phường, Huyện/TP, Tỉnh...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Số điện thoại</label>
+        <input type="tel" class="form-input" id="f-sdt" placeholder="0909...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Địa chỉ thường trú</label>
+        <input type="text" class="form-input" id="f-diachi" placeholder="Số nhà, đường, phường/xã...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Trình độ học vấn</label>
+        <select class="form-select" id="f-hocvan">
+          <option value="">-- Chọn --</option>
+          <option>Chưa tốt nghiệp THPT</option>
+          <option>Tốt nghiệp THPT</option>
+          <option>Trung cấp</option>
+          <option>Cao đẳng</option>
+          <option>Đại học</option>
+          <option>Cử nhân</option>
+        </select>
+      </div>
+
+      <div class="form-section-title">Thông tin đảng</div>
+      <div class="form-group">
+        <label class="form-label">Số thẻ đảng viên</label>
+        <input type="text" class="form-input" id="f-sothe" placeholder="DV-0001">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ngày vào Đảng (dự bị)</label>
+        <input type="date" class="form-input" id="f-ngayduby">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ngày vào Đảng (chính thức)</label>
+        <input type="date" class="form-input" id="f-ngaychinhthuc">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Chức vụ hiện nay hoặc cao nhất trước khi nghỉ hưu</label>
+        <input type="text" class="form-input" id="f-chucvu" placeholder="Bí thư, Đảng viên...">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Loại đảng viên</label>
+          <select class="form-select" id="f-loai">
+            <option>Chính thức</option><option>Dự bị</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Miễn sinh hoạt</label>
+          <select class="form-select" id="f-msh" onchange="toggleLido()">
+            <option value="Không">Không</option>
+            <option value="Có">Có</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" id="f-lido-wrap" style="display:none">
+        <label class="form-label">Lý do miễn sinh hoạt</label>
+        <input type="text" class="form-input" id="f-lido" placeholder="Già yếu, bệnh tật, công tác xa...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Lý luận chính trị</label>
+        <select class="form-select" id="f-llct">
+          <option value="">-- Chọn --</option>
+          <option>Chưa có</option>
+          <option>Sơ cấp</option>
+          <option>Trung cấp</option>
+          <option>Cao cấp</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ghi chú</label>
+        <textarea class="form-textarea" id="f-ghichu" placeholder="Ghi chú thêm..."></textarea>
+      </div>
+    </div>
+    <div class="form-footer">
+      <button class="btn-cancel" onclick="closeFormSheet()">Hủy</button>
+      <button class="btn-save" onclick="saveRecord()">💾 Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL SHEET -->
+<div class="sheet-overlay" id="detail-sheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <span class="sheet-title">Thông tin đảng viên</span>
+      <button class="sheet-close" onclick="closeDetailSheet()">✕</button>
+    </div>
+    <div id="detail-content"></div>
+    <div class="detail-actions">
+      <button class="btn-danger" onclick="confirmDelete()">🗑 Xóa</button>
+      <button class="btn-primary" onclick="editRecord()">✏️ Chỉnh sửa</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="dialog-overlay" id="confirm-dialog">
+  <div class="dialog">
+    <div class="dialog-icon">⚠️</div>
+    <div class="dialog-title">Xác nhận xóa</div>
+    <div class="dialog-msg" id="confirm-msg"></div>
+    <div class="dialog-btns">
+      <button class="dialog-cancel" onclick="closeConfirm()">Hủy</button>
+      <button class="dialog-confirm" onclick="doDelete()">Xóa</button>
+    </div>
+  </div>
+</div>
+
+<!-- SECURITY SHEET -->
+<div class="sheet-overlay" id="chpw-sheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <span class="sheet-title">🔒 Bảo mật</span>
+      <button class="sheet-close" onclick="closeChpw()">✕</button>
+    </div>
+    <div class="form-body">
+      <div class="form-section-title">Đổi mật khẩu</div>
+      <div class="form-group">
+        <label class="form-label">Mật khẩu hiện tại</label>
+        <div style="position:relative;">
+          <input type="password" class="form-input" id="cp-old" placeholder="Nhập mật khẩu cũ..." style="padding-right:42px;">
+          <button class="toggle-pw" style="top:50%;transform:translateY(-50%);" onclick="togglePwVis('cp-old',this)" tabindex="-1">👁</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mật khẩu mới</label>
+        <div style="position:relative;">
+          <input type="password" class="form-input" id="cp-new" placeholder="Tối thiểu 4 ký tự..." style="padding-right:42px;">
+          <button class="toggle-pw" style="top:50%;transform:translateY(-50%);" onclick="togglePwVis('cp-new',this)" tabindex="-1">👁</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Xác nhận mật khẩu mới</label>
+        <div style="position:relative;">
+          <input type="password" class="form-input" id="cp-confirm" placeholder="Nhập lại mật khẩu mới..." style="padding-right:42px;">
+          <button class="toggle-pw" style="top:50%;transform:translateY(-50%);" onclick="togglePwVis('cp-confirm',this)" tabindex="-1">👁</button>
+        </div>
+      </div>
+      <div class="login-err" id="cp-err" style="display:none; margin-bottom:10px;"></div>
+      <div style="background:#eafaf1;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:13px;color:#27ae60;display:none;" id="cp-ok">✅ Đổi mật khẩu thành công!</div>
+    </div>
+    <div class="form-footer" style="flex-direction:column; gap:10px;">
+      <button class="btn-save" onclick="doChangePw()">💾 Lưu mật khẩu mới</button>
+      <button class="btn-cancel" onclick="doLogout()" style="color:#c0392b; border-color:#fcc;">🚪 Đăng xuất</button>
+    </div>
+    <!-- BACKUP/RESTORE -->
+    <div class="form-body" style="padding-top:0;">
+      <div class="form-section-title">Sao lưu & Khôi phục dữ liệu</div>
+      <p style="font-size:13px;color:var(--text-3);margin-bottom:14px;line-height:1.6;">Sao lưu định kỳ để tránh mất dữ liệu. File <b>.json</b> sẽ lưu vào thư mục Tải xuống.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button onclick="backupData()" style="padding:13px;border-radius:var(--radius-sm);border:1.5px solid #b8e0c8;background:#eafaf1;color:#27ae60;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;">
+          📥 Sao lưu dữ liệu
+        </button>
+        <label style="padding:13px;border-radius:var(--radius-sm);border:1.5px solid #c8d8f0;background:#eaf0fb;color:#2563eb;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;text-align:center;display:block;">
+          📤 Khôi phục dữ liệu
+          <input type="file" accept=".json" id="restore-input" style="display:none;" onchange="restoreData(this)">
+        </label>
+      </div>
+      <div id="backup-msg" style="display:none;margin-top:10px;padding:10px 12px;border-radius:8px;font-size:13px;text-align:center;"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end #app -->
+
+<script>
+const STORAGE_KEY = 'chi-bo-members';
+let members = [], nextId = 1, editingId = null, viewingId = null, pendingAvatar = '', activeFilter = '';
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) { const d = JSON.parse(raw); members = d.members || []; nextId = d.nextId || (members.length + 1); }
+  } catch(e) {}
+  if (members.length === 0) {
+    members = [{"id": 1, "ten": "Dương Thị Hường", "gioitinh": "Nữ", "ngaysinh": "1951-12-01", "sothe": "072151000284", "diachi": "tổ 10, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Phường Trảng Bàng", "khaisinh": "Tỉnh Tây Ninh, xã Trảng Bàng", "ngayduby": "1972-09-12", "ngaychinhthuc": "1973-09-12", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 2, "ten": "Dương Tuấn Anh", "gioitinh": "Nam", "ngaysinh": "1987-02-01", "sothe": "072087006969", "diachi": "tổ 3, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, Xã Châu Thành", "ngayduby": "2012-12-14", "ngaychinhthuc": "2013-12-14", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 3, "ten": "Đinh Công Duy", "gioitinh": "Nam", "ngaysinh": "1992-06-06", "sothe": "072092001619", "diachi": "D04/48, tổ 4, Ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, Xã Châu Thành", "ngayduby": "2013-08-07", "ngaychinhthuc": "2014-08-07", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 4, "ten": "Đinh Thị Nhung", "gioitinh": "Nữ", "ngaysinh": "1957-12-25", "sothe": "072157000086", "diachi": "tổ 6, Ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, Phường An Tịnh", "ngayduby": "1976-06-09", "ngaychinhthuc": "1977-06-09", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 5, "ten": "Đỗ Đình Công", "gioitinh": "Nam", "ngaysinh": "1960-12-10", "sothe": "038060010961", "diachi": "03/13, tổ 3, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Thanh Hóa, Xã Quảng Ngọc", "khaisinh": "Tỉnh Thanh Hóa, Xã Quảng Ngọc", "ngayduby": "1990-12-18", "ngaychinhthuc": "1991-12-18", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 6, "ten": "Đỗ Thị Sơn", "gioitinh": "Nữ", "ngaysinh": "1960-09-20", "sothe": "035160012327", "diachi": "03/13, tổ 3, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Ninh Bình, Xã Thanh Bình", "khaisinh": "Tỉnh Ninh Bình, Xã Thanh Bình", "ngayduby": "1995-03-04", "ngaychinhthuc": "1996-03-04", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 7, "ten": "Đỗ Văn Cứ", "gioitinh": "Nam", "ngaysinh": "1962-12-10", "sothe": "072062002517", "diachi": "04/01a8, tổ 4, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, Xã Hòa Khánh", "ngayduby": "1996-08-12", "ngaychinhthuc": "1997-08-12", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 8, "ten": "Đỗ Văn Gạt", "gioitinh": "Nam", "ngaysinh": "1957-06-20", "sothe": "072057001493", "diachi": "tổ 9, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, Xã Châu Thành", "ngayduby": "1981-04-19", "ngaychinhthuc": "1982-10-19", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 9, "ten": "Hà Thị Giàu", "gioitinh": "Nữ", "ngaysinh": "1956-09-06", "sothe": "072156005762", "diachi": "tổ 4, Ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Phường An Tịnh", "khaisinh": "Tỉnh Tây Ninh, Phường An Tịnh", "ngayduby": "1986-07-05", "ngaychinhthuc": "1987-07-05", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 10, "ten": "Huỳnh Thị Thanh Phượng", "gioitinh": "Nữ", "ngaysinh": "1980-08-01", "sothe": "072180000778", "diachi": "tổ 4, Ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, Phường An Tịnh", "ngayduby": "2016-06-24", "ngaychinhthuc": "2017-06-24", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 11, "ten": "Lê Anh Tuấn", "gioitinh": "Nam", "ngaysinh": "1993-11-05", "sothe": "072093004903", "diachi": "tổ 10, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, Xã Châu Thành", "ngayduby": "2015-07-14", "ngaychinhthuc": "2016-07-14", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 12, "ten": "Lê Bá Quế", "gioitinh": "Nam", "ngaysinh": "1968-05-19", "sothe": "038068010314", "diachi": "02/01a17, tổ 9, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Thanh Hóa, xã Thọ Long", "khaisinh": "Tỉnh Thanh Hóa, xã Thọ Long", "ngayduby": "1993-10-26", "ngaychinhthuc": "1994-10-26", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 13, "ten": "Lê Thành Danh", "gioitinh": "Nam", "ngaysinh": "1977-03-16", "sothe": "072077004146", "diachi": "d01/01a1, tổ 1, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, Xã Châu Thành", "ngayduby": "2000-10-27", "ngaychinhthuc": "2001-10-27", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 14, "ten": "Lê Thị Hiếu Thảo", "gioitinh": "Nữ", "ngaysinh": "1968-11-13", "sothe": "072168011373", "diachi": "06/01, tổ 6, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Phường Thanh Điền", "khaisinh": "Tỉnh Tây Ninh, Phường Thanh Điền", "ngayduby": "1996-09-21", "ngaychinhthuc": "1997-09-21", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 15, "ten": "Lê Thị Phúc", "gioitinh": "Nữ", "ngaysinh": "1954-11-17", "sothe": "072154001875", "diachi": "tổ 3, Ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Hảo Đước", "khaisinh": "Tỉnh Tây Ninh, xã Châu Thành", "ngayduby": "1973-07-04", "ngaychinhthuc": "1974-03-29", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 16, "ten": "Lê Tiến Phước", "gioitinh": "Nam", "ngaysinh": "1984-02-20", "sothe": "072084013544", "diachi": "06/09, tổ 10, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Phước Vinh", "khaisinh": "Tỉnh Bắc Ninh, xã Trung Chính", "ngayduby": "2007-03-30", "ngaychinhthuc": "2008-03-30", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 17, "ten": "Lê Tiến Trường", "gioitinh": "Nam", "ngaysinh": "1950-03-18", "sothe": "072050006000", "diachi": "06/09, tổ 10, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Bắc Ninh, xã Trung Chính", "ngayduby": "1972-07-01", "ngaychinhthuc": "1973-07-01", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 18, "ten": "Lưu Nguyệt Nga", "gioitinh": "Nữ", "ngaysinh": "1964-08-22", "sothe": "079164022051", "diachi": "Ấp 4, Xã Châu Thành", "quequan": "TP Hồ Chí Minh, phường An Hội", "khaisinh": "TP Hồ Chí Minh, phường An Hội", "ngayduby": "2001-12-19", "ngaychinhthuc": "2002-12-19", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 19, "ten": "Mai Công Văn", "gioitinh": "Nam", "ngaysinh": "1953-10-20", "sothe": "072053003687", "diachi": "tổ 4, Ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, xã Hảo Đước", "ngayduby": "1975-12-13", "ngaychinhthuc": "1976-12-13", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 20, "ten": "Ngô Thị Kim Huấn", "gioitinh": "Nữ", "ngaysinh": "1955-02-01", "sothe": "072155005208", "diachi": "tổ 2, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, Xã Châu Thành", "ngayduby": "1974-11-18", "ngaychinhthuc": "1975-11-18", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 21, "ten": "Nguyễn Công Thành", "gioitinh": "Nam", "ngaysinh": "1955-01-01", "sothe": "072055001196", "diachi": "06/06, tổ 10, Ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, xã Phước Vinh", "ngayduby": "1980-12-13", "ngaychinhthuc": "1981-12-13", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 22, "ten": "Nguyễn Hiếu Nhân", "gioitinh": "Nam", "ngaysinh": "2000-07-27", "sothe": "072200005180", "diachi": "tổ 2, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, Xã Châu Thành", "ngayduby": "2019-11-04", "ngaychinhthuc": "2020-11-04", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 23, "ten": "Nguyễn Hoài Thanh", "gioitinh": "Nam", "ngaysinh": "1995-09-29", "sothe": "072095003441", "diachi": "Ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, Xã Châu Thành", "ngayduby": "2017-11-10", "ngaychinhthuc": "2018-11-10", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 24, "ten": "Nguyễn Hoàng Bích Nga", "gioitinh": "Nữ", "ngaysinh": "1978-09-16", "sothe": "072178005392", "diachi": "tổ 2, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, Bến Cầu", "ngayduby": "2013-11-08", "ngaychinhthuc": "2014-11-08", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 25, "ten": "Nguyễn Hoàng Sang", "gioitinh": "Nam", "ngaysinh": "1987-07-22", "sothe": "072087011852", "diachi": "tổ 4, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Phường Tân Ninh", "khaisinh": "Tỉnh Hà Tĩnh, Xã Châu Thành", "ngayduby": "2011-06-15", "ngaychinhthuc": "2012-06-15", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 26, "ten": "Nguyễn Minh Tú", "gioitinh": "Nam", "ngaysinh": "1992-06-21", "sothe": "072092013700", "diachi": "Ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, Xã Châu Thành", "ngayduby": "2013-10-10", "ngaychinhthuc": "2014-10-10", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 27, "ten": "Nguyễn Quang Vượng", "gioitinh": "Nam", "ngaysinh": "1955-04-04", "sothe": "024055000116", "diachi": "tổ 10, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Ninh Bình, Xã Tiên Hồng", "khaisinh": "Tỉnh Bắc Ninh, Xã Bảo Đài", "ngayduby": "1985-10-21", "ngaychinhthuc": "1986-10-21", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 28, "ten": "Nguyễn Thanh Truyền", "gioitinh": "Nam", "ngaysinh": "1974-11-10", "sothe": "042074000052", "diachi": "tổ 1, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Hà Tĩnh, Xã Đông Kinh", "khaisinh": "Tỉnh Hà Tĩnh, Xã Đông Kinh", "ngayduby": "2000-04-10", "ngaychinhthuc": "2001-04-10", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 29, "ten": "Nguyễn Thanh Xuân", "gioitinh": "Nam", "ngaysinh": "1964-10-09", "sothe": "072064003028", "diachi": "02/18, tổ 2, Ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, xã Phước Chỉ", "khaisinh": "Tỉnh Tây Ninh, xã Phước Chỉ", "ngayduby": "2000-11-18", "ngaychinhthuc": "2001-11-18", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 30, "ten": "Nguyễn Thị Gái", "gioitinh": "Nữ", "ngaysinh": "1965-08-30", "sothe": "072165005261", "diachi": "tổ 3, Ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "TP Hà Nội, xã Kiều Phú", "ngayduby": "2003-10-10", "ngaychinhthuc": "2004-10-10", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 31, "ten": "Nguyễn Thị Hương", "gioitinh": "Nữ", "ngaysinh": "1952-01-01", "sothe": "072152001880", "diachi": "tổ 1, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, Xã Châu Thành", "ngayduby": "1970-11-25", "ngaychinhthuc": "1971-08-25", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 32, "ten": "Nguyễn Thị Nào", "gioitinh": "Nữ", "ngaysinh": "1966-03-10", "sothe": "072166003154", "diachi": "04/01a8, tổ 4, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, Phường Thanh Điền", "ngayduby": "2006-11-15", "ngaychinhthuc": "2007-11-15", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 33, "ten": "Nguyễn Thị Nghiệp", "gioitinh": "Nữ", "ngaysinh": "1960-04-08", "sothe": "072160002750", "diachi": "tổ 3, Ấp Tam Hạp, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Phường Thanh Điền", "khaisinh": "Tỉnh Tây Ninh, Phường Thanh Điền", "ngayduby": "1983-09-06", "ngaychinhthuc": "1984-09-06", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 34, "ten": "Nguyễn Thị Oanh", "gioitinh": "Nữ", "ngaysinh": "1988-01-02", "sothe": "033188012587", "diachi": "tổ 4, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Hưng Yên, phường Đường Hào", "khaisinh": "Tỉnh Hưng Yên, phường Đường Hào", "ngayduby": "2020-01-12", "ngaychinhthuc": "2021-01-12", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 35, "ten": "Nguyễn Thụy Thúy An", "gioitinh": "Nữ", "ngaysinh": "1987-09-03", "sothe": "072187005894", "diachi": "08/19, tổ 8, Khu phố 2, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Phường Tân Ninh", "khaisinh": "Tỉnh Tây Ninh, Phường Tân Ninh", "ngayduby": "2015-07-02", "ngaychinhthuc": "2016-07-02", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 36, "ten": "Nguyễn Trọng Lý", "gioitinh": "Nam", "ngaysinh": "1960-06-30", "sothe": "036060006425", "diachi": "tổ 3, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Ninh Bình, xã Cát Thành", "khaisinh": "Tỉnh Ninh Bình, xã Cát Thành", "ngayduby": "1986-11-07", "ngaychinhthuc": "1987-11-07", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 37, "ten": "Nguyễn Văn Dũng", "gioitinh": "Nam", "ngaysinh": "1964-02-24", "sothe": "038064010130", "diachi": "tổ 9, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Thanh Hóa, Xã Hợp Tiến", "khaisinh": "Tỉnh Thanh Hóa, Xã Hợp Tiến", "ngayduby": "1987-12-17", "ngaychinhthuc": "1988-12-17", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 38, "ten": "Nguyễn Đức Phụng", "gioitinh": "Nam", "ngaysinh": "1952-04-10", "sothe": "038052019386", "diachi": "tổ 3, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Thanh Hóa, xã Hoằng Sơn", "khaisinh": "Tỉnh Thanh Hóa, xã Hoằng Sơn", "ngayduby": "1982-09-20", "ngaychinhthuc": "1983-09-20", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 39, "ten": "Nguyễn Văn Phương", "gioitinh": "Nam", "ngaysinh": "1986-10-29", "sothe": "072086007591", "diachi": "tổ 3, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Thanh Hóa, xã Hoằng Sơn", "ngayduby": "2008-04-30", "ngaychinhthuc": "2009-04-30", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 40, "ten": "Nguyễn Minh Mẫn", "gioitinh": "Nam", "ngaysinh": "1961-01-19", "sothe": "079061027140", "diachi": "tổ 3, ấp 4, Xã Châu Thành", "quequan": "TP Hồ Chí Minh, phường Hưng Phú", "khaisinh": "TP Hồ Chí Minh, phường Hưng Phú", "ngayduby": "1987-01-14", "ngaychinhthuc": "1988-01-14", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 41, "ten": "Phạm Ngọc Sơn", "gioitinh": "Nam", "ngaysinh": "1965-10-05", "sothe": "036065006990", "diachi": "03/01a10, tổ 3, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Ninh Bình, xã Minh Thái", "khaisinh": "Tỉnh Ninh Bình, xã Minh Thái", "ngayduby": "1991-06-21", "ngaychinhthuc": "1992-06-21", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 42, "ten": "Phạm Phi Hùng", "gioitinh": "Nam", "ngaysinh": "1989-02-17", "sothe": "072089001310", "diachi": "02/01a4, tổ 9, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, xã Hiệp Thạnh", "khaisinh": "Tỉnh Tây Ninh, Trảng Bàng", "ngayduby": "2013-05-14", "ngaychinhthuc": "2014-05-14", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 43, "ten": "Phạm Quốc Trung", "gioitinh": "Nam", "ngaysinh": "1981-11-07", "sothe": "072081000268", "diachi": "tổ 1, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, Xã Châu Thành", "ngayduby": "2002-11-06", "ngaychinhthuc": "2003-11-06", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 44, "ten": "Phạm Văn Sơn", "gioitinh": "Nam", "ngaysinh": "1962-12-30", "sothe": "072062002454", "diachi": "02/41, tổ 2, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, phường Gia Lộc", "khaisinh": "Tỉnh Tây Ninh, Phường Gia Lộc", "ngayduby": "1985-02-12", "ngaychinhthuc": "1986-02-12", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 45, "ten": "Phạm Văn Tân", "gioitinh": "Nam", "ngaysinh": "1991-05-27", "sothe": "072091006462", "diachi": "8/30, tổ 4, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, Xã Châu Thành", "ngayduby": "2014-11-13", "ngaychinhthuc": "2015-11-13", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 46, "ten": "Phạm Văn Thông", "gioitinh": "Nam", "ngaysinh": "1956-05-16", "sothe": "072056001749", "diachi": "tổ 1, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, Xã Châu Thành", "ngayduby": "2011-02-11", "ngaychinhthuc": "2012-02-11", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 47, "ten": "Phan Hoàng Lộc", "gioitinh": "Nam", "ngaysinh": "1962-08-20", "sothe": "072062002377", "diachi": "tổ 4, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Hảo Đước", "khaisinh": "Tỉnh Tây Ninh, Phường An Tịnh", "ngayduby": "1983-12-26", "ngaychinhthuc": "1985-06-26", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 48, "ten": "Trần Minh Hậu", "gioitinh": "Nữ", "ngaysinh": "1969-01-10", "sothe": "072169005936", "diachi": "tổ 8, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Hà Nam Ninh, Xã Lam", "ngayduby": "1995-07-24", "ngaychinhthuc": "1996-07-24", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 49, "ten": "Trần Minh Trung", "gioitinh": "Nam", "ngaysinh": "1969-10-26", "sothe": "079069007375", "diachi": "ấp 4, Xã Châu Thành", "quequan": "TP Hồ Chí Minh, quận 6", "khaisinh": "Tỉnh Tây Ninh, xã Mỹ Lộc", "ngayduby": "1992-10-29", "ngaychinhthuc": "1993-10-29", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 50, "ten": "Trần Minh Tuấn", "gioitinh": "Nam", "ngaysinh": "1978-01-05", "sothe": "072078008900", "diachi": "tổ 9, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, xã Thạnh Đức", "khaisinh": "Tỉnh Tây Ninh, xã Lộc Ninh", "ngayduby": "2009-09-02", "ngaychinhthuc": "2010-09-02", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 51, "ten": "Trần Quốc Danh", "gioitinh": "Nam", "ngaysinh": "1959-11-25", "sothe": "040059000227", "diachi": "03/32, tổ 3, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Nghệ An, Xã Thiên Nhẫn", "khaisinh": "Tỉnh Nghệ An, Xã Thiên Nhẫn", "ngayduby": "1981-05-10", "ngaychinhthuc": "1982-11-10", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 52, "ten": "Trần Thanh Lăng", "gioitinh": "Nam", "ngaysinh": "1973-11-28", "sothe": "072073002835", "diachi": "tổ 6, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, xã Phước Chỉ", "khaisinh": "Tỉnh Quảng Ngãi, xã Phước Chỉ", "ngayduby": "1999-09-29", "ngaychinhthuc": "2000-09-29", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 53, "ten": "Trần Thị Thanh Nga", "gioitinh": "Nữ", "ngaysinh": "1975-11-25", "sothe": "072175003820", "diachi": "tổ 10, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Hòa Hội", "khaisinh": "Tỉnh Tây Ninh, Hảo Đước", "ngayduby": "2007-11-26", "ngaychinhthuc": "2008-11-26", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 54, "ten": "Trần Thị Thu Việt", "gioitinh": "Nữ", "ngaysinh": "1959-08-29", "sothe": "072159008075", "diachi": "02/41, tổ 2, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, Phường Thanh Điền", "ngayduby": "2002-12-11", "ngaychinhthuc": "2003-12-11", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 55, "ten": "Trần Văn Phục", "gioitinh": "Nam", "ngaysinh": "1948-08-01", "sothe": "072048000445", "diachi": "tổ 10, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Đồng Tháp, Xã Châu Thành", "ngayduby": "1968-02-18", "ngaychinhthuc": "1969-02-18", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 56, "ten": "Trần Văn Phương", "gioitinh": "Nam", "ngaysinh": "1963-07-15", "sothe": "072063009836", "diachi": "tổ 8, Ấp Xóm Mới 1, Xã Hảo Đước", "quequan": "Tỉnh Tây Ninh, Xã Hảo Đước", "khaisinh": "Tỉnh Tây Ninh, xã Đức Hòa", "ngayduby": "1991-08-24", "ngaychinhthuc": "1992-08-24", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 57, "ten": "Trần Văn Vững", "gioitinh": "Nam", "ngaysinh": "1966-02-26", "sothe": "072066000968", "diachi": "06/01, tổ 6, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Ninh Điền", "khaisinh": "Tỉnh Tây Ninh, xã Ninh Điền", "ngayduby": "1987-12-22", "ngaychinhthuc": "1988-12-22", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 58, "ten": "Trương Thị Hồng Nhung", "gioitinh": "Nữ", "ngaysinh": "1971-04-14", "sothe": "072171003683", "diachi": "02/01a17, tổ 9, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Phường Thanh Điền", "khaisinh": "Tỉnh Tây Ninh, Phường Thanh Điền", "ngayduby": "1995-05-21", "ngaychinhthuc": "1996-05-21", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 59, "ten": "Võ Văn Vu", "gioitinh": "Nam", "ngaysinh": "1966-08-01", "sothe": "072066002693", "diachi": "01/13, tổ 1, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Tây Ninh, Xã Châu Thành", "ngayduby": "1993-10-16", "ngaychinhthuc": "1994-10-16", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 60, "ten": "Vũ Duy Hoàng", "gioitinh": "Nam", "ngaysinh": "1965-08-25", "sothe": "001065019061", "diachi": "tổ 6, ấp 4, Xã Châu Thành", "quequan": "TP Hà Nội, Xã Phù Đổng", "khaisinh": "TP Hà Nội, Xã Phù Đổng", "ngayduby": "1986-12-04", "ngaychinhthuc": "1987-12-04", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 61, "ten": "Vũ Đức Tâm", "gioitinh": "Nam", "ngaysinh": "1993-09-09", "sothe": "072093009158", "diachi": "tổ 6, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "TP Hà Nội, Xã Phù Đổng", "ngayduby": "2018-08-19", "ngaychinhthuc": "2019-08-19", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 62, "ten": "Vũ Thị Diệu", "gioitinh": "Nữ", "ngaysinh": "1965-01-01", "sothe": "033165002923", "diachi": "03/12, tổ 3, Ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "Tỉnh Hưng Yên, xã Quang Hưng", "ngayduby": "1998-05-18", "ngaychinhthuc": "1999-05-18", "loai": "Chính thức", "msh": "Có", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}, {"id": 63, "ten": "Vũ Văn Khải", "gioitinh": "Nam", "ngaysinh": "1964-05-08", "sothe": "072064004964", "diachi": "06/21, tổ 6, ấp 4, Xã Châu Thành", "quequan": "Tỉnh Tây Ninh, Xã Châu Thành", "khaisinh": "TP Hà Nội, Xã Phù Đổng", "ngayduby": "1985-07-22", "ngaychinhthuc": "1986-07-22", "loai": "Chính thức", "msh": "Không", "lido": "", "chucvu": "Đảng viên", "hocvan": "", "llct": "", "sdt": "", "ghichu": "", "avatar": ""}];
+    nextId = 64; saveData();
+  }
+}
+function saveData() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify({members, nextId})); } catch(e) {} }
+
+function fmt(d) { if (!d) return '—'; const p = d.split('-'); return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:'—'; }
+function age(d) { if (!d) return ''; const y = new Date().getFullYear() - parseInt(d.split('-')[0]); return isNaN(y)?'':` (${y} tuổi)`; }
+function tuoidang(d) {
+  if (!d) return '';
+  const now = new Date(), start = new Date(d);
+  if (isNaN(start)) return '';
+  let years = now.getFullYear() - start.getFullYear();
+  const mo = now.getMonth() - start.getMonth();
+  if (mo < 0 || (mo===0 && now.getDate()<start.getDate())) years--;
+  if (years < 0) return '';
+  if (years === 0) { const months=(now.getFullYear()-start.getFullYear())*12+now.getMonth()-start.getMonth(); return months>0?`${months} tháng tuổi đảng`:'dưới 1 tháng'; }
+  return `${years} năm tuổi đảng`;
+}
+function initials(n) { return n.trim().split(' ').slice(-2).map(w=>w[0]||'').join('').toUpperCase(); }
+function avatarHtml(m, w=50, h=62, r='var(--radius-sm)') {
+  if (m.avatar) return `<div style="width:${w}px;height:${h}px;border-radius:${r};overflow:hidden;flex-shrink:0;"><img src="${m.avatar}" style="width:100%;height:100%;object-fit:cover;display:block;"></div>`;
+  return `<div class="avatar" style="width:${w}px;height:${h}px;border-radius:${r};">${initials(m.ten)}</div>`;
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent = members.length;
+  document.getElementById('stat-ct').textContent = members.filter(m=>m.loai==='Chính thức').length;
+  document.getElementById('stat-db').textContent = members.filter(m=>m.loai==='Dự bị').length;
+  document.getElementById('stat-msh').textContent = members.filter(m=>m.msh==='Có').length;
+}
+function setFilter(f) { activeFilter=f; document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',c.dataset.filter===f)); renderList(); }
+
+function renderList() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  let list = members.filter(m => {
+    const matchQ = m.ten.toLowerCase().includes(q)||(m.chucvu||'').toLowerCase().includes(q)||(m.sothe||'').toLowerCase().includes(q)||(m.sdt||'').includes(q);
+    const matchF = !activeFilter||(activeFilter==='ct'&&m.loai==='Chính thức')||(activeFilter==='db'&&m.loai==='Dự bị')||(activeFilter==='msh'&&m.msh==='Có');
+    return matchQ&&matchF;
+  });
+  const container = document.getElementById('member-list');
+  const empty = document.getElementById('empty-state');
+  const count = document.getElementById('list-count');
+  if (list.length===0) { container.innerHTML=''; empty.style.display='block'; count.textContent=''; return; }
+  empty.style.display='none'; count.textContent=`${list.length} đảng viên`;
+  container.innerHTML = list.map(m=>`
+    <div class="member-card ${m.msh==='Có'?'msh-card':''}" onclick="showDetail(${m.id})">
+      ${avatarHtml(m)}
+      <div class="member-info">
+        <div class="member-name">${m.ten}</div>
+        <div class="member-sub">${m.chucvu||'—'} · ${m.sothe||'Chưa có số thẻ'}</div>
+        <div class="badges">
+          <span class="badge ${m.loai==='Chính thức'?'badge-ct':'badge-db'}">${m.loai}</span>
+          ${m.ngayduby?`<span class="badge" style="background:#f0f4ff;color:#3b5bdb;">${tuoidang(m.ngayduby)}</span>`:''}
+          ${m.msh==='Có'?'<span class="badge badge-msh">Miễn SH</span>':''}
+        </div>
+      </div>
+      <button class="btn-delete-inline" onclick="event.stopPropagation();confirmDeleteById(${m.id})" aria-label="Xóa">🗑</button>
+    </div>
+  `).join('');
+  updateStats();
+}
+
+// ─── AVATAR ───
+function handleAvatar(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    pendingAvatar = e.target.result;
+    const img = document.getElementById('av-img');
+    img.src = pendingAvatar; img.style.display='block';
+    document.getElementById('av-icon').style.display='none';
+    document.getElementById('av-rm-btn').style.display='block';
+  };
+  reader.readAsDataURL(file);
+}
+function removeAvatar() {
+  pendingAvatar='';
+  const img = document.getElementById('av-img');
+  img.src=''; img.style.display='none';
+  document.getElementById('av-icon').style.display='block';
+  document.getElementById('av-rm-btn').style.display='none';
+  document.getElementById('f-avatar').value='';
+}
+
+// ─── LIGHTBOX ───
+function openLightbox(src, name) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox-name').textContent = name;
+  document.getElementById('lightbox').classList.add('show');
+}
+function closeLightbox() { document.getElementById('lightbox').classList.remove('show'); }
+function downloadAvatar() {
+  const src = document.getElementById('lightbox-img').src;
+  const name = document.getElementById('lightbox-name').textContent;
+  const a = document.createElement('a');
+  a.href = src; a.download = `${name}.jpg`; a.click();
+}
+
+// ─── FORM ───
+function toggleLido() { document.getElementById('f-lido-wrap').style.display = document.getElementById('f-msh').value==='Có'?'block':'none'; }
+
+function showAddSheet() {
+  editingId=null; pendingAvatar='';
+  document.getElementById('form-title').textContent='Thêm đảng viên';
+  ['f-ten','f-ngaysinh','f-ngayduby','f-ngaychinhthuc','f-sothe','f-chucvu','f-lido','f-sdt','f-diachi','f-quequan','f-khaisinh','f-ghichu'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-gioitinh').value='Nam';
+  document.getElementById('f-loai').value='Chính thức';
+  document.getElementById('f-msh').value='Không';
+  document.getElementById('f-hocvan').value='';
+  document.getElementById('f-llct').value='';
+  document.getElementById('f-lido-wrap').style.display='none';
+  removeAvatar();
+  document.getElementById('form-sheet').classList.add('show');
+  document.getElementById('form-sheet-inner').scrollTop=0;
+}
+function closeFormSheet() { document.getElementById('form-sheet').classList.remove('show'); }
+
+function saveRecord() {
+  const ten = document.getElementById('f-ten').value.trim();
+  if (!ten) { alert('Vui lòng nhập họ và tên!'); return; }
+  const data = {
+    id: editingId||nextId++, ten, avatar: pendingAvatar,
+    ngaysinh: document.getElementById('f-ngaysinh').value,
+    gioitinh: document.getElementById('f-gioitinh').value,
+    quequan: document.getElementById('f-quequan').value.trim(),
+    khaisinh: document.getElementById('f-khaisinh').value.trim(),
+    ngayduby: document.getElementById('f-ngayduby').value,
+    ngaychinhthuc: document.getElementById('f-ngaychinhthuc').value,
+    sothe: document.getElementById('f-sothe').value.trim(),
+    chucvu: document.getElementById('f-chucvu').value.trim(),
+    loai: document.getElementById('f-loai').value,
+    hocvan: document.getElementById('f-hocvan').value,
+    llct: document.getElementById('f-llct').value,
+    msh: document.getElementById('f-msh').value,
+    lido: document.getElementById('f-lido').value.trim(),
+    sdt: document.getElementById('f-sdt').value.trim(),
+    diachi: document.getElementById('f-diachi').value.trim(),
+    ghichu: document.getElementById('f-ghichu').value.trim(),
+  };
+  if (editingId) { const i=members.findIndex(m=>m.id===editingId); if(i>-1) members[i]=data; }
+  else members.push(data);
+  saveData(); closeFormSheet(); closeDetailSheet(); renderList();
+}
+
+// ─── DETAIL ───
+function drow(k, v, warn) { return `<div class="detail-row"><span class="detail-key">${k}</span><span class="detail-val" style="${warn?'color:var(--warn)':''}">${v}</span></div>`; }
+
+function showDetail(id) {
+  viewingId = id;
+  const m = members.find(x=>x.id===id); if (!m) return;
+  const hasAvatar = !!m.avatar;
+  const avLarge = hasAvatar
+    ? `<div class="detail-avatar" onclick="openLightbox('${m.avatar}','${m.ten}')" title="Nhấn để xem ảnh lớn"><img src="${m.avatar}" alt="${m.ten}"></div>`
+    : `<div class="detail-avatar">${initials(m.ten)}</div>`;
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-avatar-wrap">
+      ${avLarge}
+      ${hasAvatar?`<div style="font-size:11px;color:var(--text-3);margin-top:-6px;margin-bottom:6px;">Nhấn ảnh để xem và tải về</div>`:''}
+      <div class="detail-name">${m.ten}</div>
+      <div class="detail-sub">${m.chucvu||'—'} · ${m.gioitinh||'—'}${age(m.ngaysinh)}</div>
+      <div class="detail-badges">
+        <span class="badge ${m.loai==='Chính thức'?'badge-ct':'badge-db'}">${m.loai}</span>
+        ${m.msh==='Có'?'<span class="badge badge-msh">Miễn sinh hoạt</span>':''}
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Thông tin cá nhân</div>
+      ${drow('Ngày sinh', fmt(m.ngaysinh)+age(m.ngaysinh))}
+      ${drow('Giới tính', m.gioitinh||'—')}
+      ${drow('Quê quán', m.quequan||'—')}
+      ${drow('Nơi khai sinh', m.khaisinh||'—')}
+      ${drow('Điện thoại', m.sdt?`<a href="tel:${m.sdt}" style="color:var(--red);text-decoration:none;">${m.sdt}</a>`:'—')}
+      ${drow('Địa chỉ', m.diachi||'—')}
+      ${drow('Học vấn', m.hocvan||'—')}
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Thông tin đảng</div>
+      ${drow('Số thẻ', m.sothe||'—')}
+      ${drow('Ngày vào Đảng (dự bị)', fmt(m.ngayduby))}
+      ${drow('Ngày vào Đảng (chính thức)', fmt(m.ngaychinhthuc))}
+      ${drow('Tuổi đảng', m.ngayduby?`<span style="color:var(--red);font-weight:700;">${tuoidang(m.ngayduby)}</span>`:'—')}
+      ${drow('Chức vụ', m.chucvu||'—')}
+      ${drow('Loại đảng viên', m.loai)}
+      ${drow('Lý luận chính trị', m.llct||'—')}
+      ${drow('Miễn sinh hoạt', m.msh==='Có'?`Có${m.lido?' — '+m.lido:''}`:'Không', m.msh==='Có')}
+      ${m.ghichu?drow('Ghi chú', m.ghichu):''}
+    </div>
+  `;
+  document.getElementById('detail-sheet').classList.add('show');
+}
+function closeDetailSheet() { document.getElementById('detail-sheet').classList.remove('show'); viewingId=null; }
+
+function editRecord() {
+  const m = members.find(x=>x.id===viewingId); if (!m) return;
+  closeDetailSheet();
+  editingId=m.id; pendingAvatar=m.avatar||'';
+  document.getElementById('form-title').textContent='Chỉnh sửa đảng viên';
+  document.getElementById('f-ten').value=m.ten;
+  document.getElementById('f-ngaysinh').value=m.ngaysinh||'';
+  document.getElementById('f-gioitinh').value=m.gioitinh||'Nam';
+  document.getElementById('f-quequan').value=m.quequan||'';
+  document.getElementById('f-khaisinh').value=m.khaisinh||'';
+  document.getElementById('f-ngayduby').value=m.ngayduby||'';
+  document.getElementById('f-ngaychinhthuc').value=m.ngaychinhthuc||'';
+  document.getElementById('f-sothe').value=m.sothe||'';
+  document.getElementById('f-chucvu').value=m.chucvu||'';
+  document.getElementById('f-loai').value=m.loai;
+  document.getElementById('f-hocvan').value=m.hocvan||'';
+  document.getElementById('f-llct').value=m.llct||'';
+  document.getElementById('f-msh').value=m.msh;
+  document.getElementById('f-lido').value=m.lido||'';
+  document.getElementById('f-lido-wrap').style.display=m.msh==='Có'?'block':'none';
+  document.getElementById('f-sdt').value=m.sdt||'';
+  document.getElementById('f-diachi').value=m.diachi||'';
+  document.getElementById('f-ghichu').value=m.ghichu||'';
+  if (pendingAvatar) {
+    const img=document.getElementById('av-img');
+    img.src=pendingAvatar; img.style.display='block';
+    document.getElementById('av-icon').style.display='none';
+    document.getElementById('av-rm-btn').style.display='block';
+  } else { removeAvatar(); }
+  document.getElementById('form-sheet').classList.add('show');
+  document.getElementById('form-sheet-inner').scrollTop=0;
+}
+
+// ─── DELETE ───
+function confirmDelete() {
+  const m=members.find(x=>x.id===viewingId); if(!m) return;
+  document.getElementById('confirm-msg').textContent=`Bạn có chắc muốn xóa đảng viên "${m.ten}"? Hành động này không thể hoàn tác.`;
+  document.getElementById('confirm-dialog').classList.add('show');
+}
+function confirmDeleteById(id) { viewingId=id; confirmDelete(); }
+function closeConfirm() { document.getElementById('confirm-dialog').classList.remove('show'); }
+function doDelete() { members=members.filter(m=>m.id!==viewingId); saveData(); closeConfirm(); closeDetailSheet(); renderList(); }
+
+// ─── BACKDROP CLOSE ───
+['form-sheet','detail-sheet','confirm-dialog','chpw-sheet'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){ if(e.target===this) { if(id==='form-sheet')closeFormSheet(); else if(id==='detail-sheet')closeDetailSheet(); else if(id==='confirm-dialog')closeConfirm(); else closeChpw(); } });
+});
+document.getElementById('lightbox').addEventListener('click',function(e){ if(e.target===this||e.target===document.getElementById('lightbox-img')) closeLightbox(); });
+
+// ─── BACKUP / RESTORE ─────────────────────────────────────
+function backupData() {
+  const data = { members, nextId, exportedAt: new Date().toLocaleString('vi-VN') };
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `chibo-ap4-backup-${date}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showBackupMsg('✅ Sao lưu thành công! File đã lưu vào Tải xuống.', '#eafaf1', '#27ae60');
+}
+
+function restoreData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.members || !Array.isArray(data.members)) throw new Error('File không hợp lệ');
+      if (!confirm(`Khôi phục ${data.members.length} đảng viên từ file "${file.name}"?\n\nDữ liệu hiện tại sẽ bị thay thế!`)) return;
+      members = data.members;
+      nextId = data.nextId || (members.length + 1);
+      saveData();
+      renderList();
+      updateStats();
+      input.value = '';
+      showBackupMsg(`✅ Khôi phục thành công ${members.length} đảng viên!`, '#eafaf1', '#27ae60');
+    } catch(err) {
+      showBackupMsg('❌ File không hợp lệ. Vui lòng chọn file backup đúng định dạng.', '#fff5f5', '#e74c3c');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function showBackupMsg(text, bg, color) {
+  const el = document.getElementById('backup-msg');
+  el.textContent = text;
+  el.style.background = bg;
+  el.style.color = color;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 3000);
+}
+
+// ─── AUTH ───
+const PW_KEY='chi-bo-pw', SESSION_KEY='chi-bo-session', DEFAULT_PW='123456';
+function getStoredPw() { return localStorage.getItem(PW_KEY)||DEFAULT_PW; }
+function togglePwVis(inputId,btn) { const el=document.getElementById(inputId); if(el.type==='password'){el.type='text';btn.textContent='🙈';}else{el.type='password';btn.textContent='👁';} }
+function doLogin() {
+  const val=document.getElementById('pw-input').value;
+  const err=document.getElementById('login-err');
+  if(val===getStoredPw()){
+    sessionStorage.setItem(SESSION_KEY,'1');
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    document.getElementById('pw-input').value='';
+    err.classList.remove('show');
+    loadData(); renderList(); updateStats();
+  } else { err.classList.add('show'); document.getElementById('pw-input').value=''; document.getElementById('pw-input').focus(); }
+}
+function doLogout() { sessionStorage.removeItem(SESSION_KEY); document.getElementById('app').style.display='none'; document.getElementById('login-screen').style.display='flex'; closeChpw(); }
+function showChpwMenu() { ['cp-old','cp-new','cp-confirm'].forEach(id=>document.getElementById(id).value=''); document.getElementById('cp-err').style.display='none'; document.getElementById('cp-ok').style.display='none'; document.getElementById('chpw-sheet').classList.add('show'); }
+function closeChpw() { document.getElementById('chpw-sheet').classList.remove('show'); }
+function doChangePw() {
+  const old=document.getElementById('cp-old').value, nw=document.getElementById('cp-new').value, cf=document.getElementById('cp-confirm').value;
+  const errEl=document.getElementById('cp-err'), okEl=document.getElementById('cp-ok');
+  errEl.style.display='none'; okEl.style.display='none';
+  if(old!==getStoredPw()){errEl.textContent='❌ Mật khẩu hiện tại không đúng.';errEl.style.display='block';return;}
+  if(nw.length<4){errEl.textContent='❌ Mật khẩu mới phải có ít nhất 4 ký tự.';errEl.style.display='block';return;}
+  if(nw!==cf){errEl.textContent='❌ Xác nhận mật khẩu không khớp.';errEl.style.display='block';return;}
+  localStorage.setItem(PW_KEY,nw); okEl.style.display='block';
+  ['cp-old','cp-new','cp-confirm'].forEach(id=>document.getElementById(id).value='');
+  setTimeout(()=>closeChpw(),1500);
+}
+
+// ─── SERVICE WORKER ───
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+
+// ─── INIT ───
+if (sessionStorage.getItem(SESSION_KEY)==='1') {
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  loadData(); renderList(); updateStats();
+}
+</script>
+</body>
+</html>
